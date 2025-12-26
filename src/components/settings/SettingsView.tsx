@@ -1,0 +1,182 @@
+import { motion } from 'framer-motion';
+import { Settings, Github, Slack, Bell, Palette, Shield, Key, ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+const integrations = [
+  { name: 'GitHub', description: 'Connect your repositories', icon: Github, connected: true },
+  { name: 'Slack', description: 'Get notifications in Slack', icon: Slack, connected: false },
+];
+
+export const SettingsView = () => {
+  return (
+    <div className="p-6 space-y-6 max-w-4xl">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
+          <Settings className="w-7 h-7 text-primary" />
+          Settings
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Manage your account and integrations
+        </p>
+      </motion.div>
+
+      {/* Integrations */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="glass rounded-2xl p-6"
+      >
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Key className="w-5 h-5 text-primary" />
+          Integrations
+        </h3>
+        <div className="space-y-4">
+          {integrations.map((integration, index) => {
+            const Icon = integration.icon;
+            return (
+              <motion.div
+                key={integration.name}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + index * 0.1 }}
+                className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-foreground" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-foreground">{integration.name}</p>
+                    <p className="text-sm text-muted-foreground">{integration.description}</p>
+                  </div>
+                </div>
+                <Button 
+                  variant={integration.connected ? "outline" : "gradient"}
+                  size="sm"
+                  className="gap-2"
+                >
+                  {integration.connected ? (
+                    <>
+                      Connected
+                      <ExternalLink className="w-4 h-4" />
+                    </>
+                  ) : (
+                    'Connect'
+                  )}
+                </Button>
+              </motion.div>
+            );
+          })}
+        </div>
+      </motion.div>
+
+      {/* Notifications */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="glass rounded-2xl p-6"
+      >
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Bell className="w-5 h-5 text-primary" />
+          Notifications
+        </h3>
+        <div className="space-y-4">
+          {[
+            { label: 'Code review alerts', description: 'Get notified when AI finds issues', enabled: true },
+            { label: 'Sprint updates', description: 'Daily sprint progress summaries', enabled: true },
+            { label: 'Team activity', description: 'Commits and PR notifications', enabled: false },
+          ].map((setting, index) => (
+            <motion.div
+              key={setting.label}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 + index * 0.1 }}
+              className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+            >
+              <div>
+                <p className="font-medium text-foreground">{setting.label}</p>
+                <p className="text-sm text-muted-foreground">{setting.description}</p>
+              </div>
+              <button
+                className={cn(
+                  "w-12 h-6 rounded-full transition-colors relative",
+                  setting.enabled ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <div
+                  className={cn(
+                    "w-5 h-5 rounded-full bg-foreground absolute top-0.5 transition-transform",
+                    setting.enabled ? "translate-x-6" : "translate-x-0.5"
+                  )}
+                />
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Appearance */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="glass rounded-2xl p-6"
+      >
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Palette className="w-5 h-5 text-primary" />
+          Appearance
+        </h3>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Dark', active: true },
+            { label: 'Light', active: false },
+            { label: 'System', active: false },
+          ].map((theme) => (
+            <button
+              key={theme.label}
+              className={cn(
+                "p-4 rounded-xl border text-center transition-all",
+                theme.active 
+                  ? "border-primary bg-primary/10 text-primary" 
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50"
+              )}
+            >
+              {theme.label}
+            </button>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Security */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="glass rounded-2xl p-6"
+      >
+        <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
+          <Shield className="w-5 h-5 text-primary" />
+          Security
+        </h3>
+        <div className="space-y-4">
+          <Button variant="outline" className="w-full justify-start gap-3">
+            Change Password
+          </Button>
+          <Button variant="outline" className="w-full justify-start gap-3">
+            Two-Factor Authentication
+          </Button>
+          <Button variant="outline" className="w-full justify-start gap-3 text-destructive hover:text-destructive">
+            Delete Account
+          </Button>
+        </div>
+      </motion.div>
+    </div>
+  );
+};

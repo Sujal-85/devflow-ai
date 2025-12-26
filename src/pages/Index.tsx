@@ -1,11 +1,55 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Sidebar } from '@/components/layout/Sidebar';
+import { Header } from '@/components/layout/Header';
+import { DashboardView } from '@/components/dashboard/DashboardView';
+import { CodeReviewView } from '@/components/code-review/CodeReviewView';
+import { DocumentationView } from '@/components/documentation/DocumentationView';
+import { SprintPlannerView } from '@/components/sprint-planner/SprintPlannerView';
+import { TeamInsightsView } from '@/components/team-insights/TeamInsightsView';
+import { SettingsView } from '@/components/settings/SettingsView';
+
+const sectionTitles: Record<string, { title: string; subtitle: string }> = {
+  'dashboard': { title: 'Dashboard', subtitle: 'Overview of your development activity' },
+  'code-review': { title: 'Code Review', subtitle: 'AI-powered code analysis' },
+  'documentation': { title: 'Documentation', subtitle: 'Auto-generate docs from code' },
+  'sprint-planner': { title: 'Sprint Planner', subtitle: 'Manage tasks and sprints' },
+  'team-insights': { title: 'Team Insights', subtitle: 'Performance analytics' },
+  'settings': { title: 'Settings', subtitle: 'Configure your workspace' },
+};
 
 const Index = () => {
+  const [activeSection, setActiveSection] = useState('dashboard');
+
+  const renderContent = () => {
+    switch (activeSection) {
+      case 'dashboard':
+        return <DashboardView />;
+      case 'code-review':
+        return <CodeReviewView />;
+      case 'documentation':
+        return <DocumentationView />;
+      case 'sprint-planner':
+        return <SprintPlannerView />;
+      case 'team-insights':
+        return <TeamInsightsView />;
+      case 'settings':
+        return <SettingsView />;
+      default:
+        return <DashboardView />;
+    }
+  };
+
+  const currentSection = sectionTitles[activeSection] || sectionTitles['dashboard'];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-background">
+      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
+      
+      <div className="ml-[280px] transition-all duration-300">
+        <Header title={currentSection.title} subtitle={currentSection.subtitle} />
+        <main className="min-h-[calc(100vh-64px)]">
+          {renderContent()}
+        </main>
       </div>
     </div>
   );
