@@ -1,0 +1,202 @@
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { LogIn, Mail, Lock, ArrowRight, Github } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
+import { signInWithPopup } from 'firebase/auth';
+import { auth, googleProvider, githubProvider } from '@/lib/firebase';
+import { useAuth } from '@/context/AuthContext';
+
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const { login } = useAuth();
+    // navigate is handled in login function
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoading(true);
+
+        try {
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                // n8n Webhook is now triggered by the backend
+
+                // Use context login function
+                login(data);
+            } else {
+                toast.error(data.message || 'Login failed');
+            }
+        } catch (error) {
+            toast.error('Something went wrong. Please try again.');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSocialLogin = async (provider: any) => {
+        try {
+            const result = await signInWithPopup(auth, provider);
+            // In a real app, you would send the token to your backend here
+            // For now, we'll simulate a successful login
+            console.log('Social login success:', result.user);
+
+            const userInfo = {
+                _id: result.user.uid,
+                name: result.user.displayName,
+                email: result.user.email,
+                token: await result.user.getIdToken(), // Use Firebase token
+            };
+
+            // Trigger n8n Webhook via Backend Proxy
+            try {
+                await fetch('http://localhost:5000/api/auth/webhook-trigger', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: result.user.displayName,
+                        email: result.user.email
+                    })
+                });
+            } catch (err) {
+                console.error('Webhook trigger failed:', err);
+            }
+
+            login(userInfo as any);
+        } catch (error: any) {
+            console.error('Social login error:', error);
+            toast.error(error.message || 'Social login failed');
+        }
+    };
+
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.2),_transparent_70%)] pointer-events-none" />
+
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="w-full max-w-md"
+            >
+                <div className="glass rounded-2xl p-8 border border-border shadow-2xl">
+                    <div className="text-center mb-8">
+                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-4">
+                            <LogIn className="w-6 h-6 text-primary" />
+                        </div>
+                        <h1 className="text-2xl font-bold text-foreground">Welcome Back</h1>
+                        <p className="text-muted-foreground mt-2">Sign in to continue to DevFlow</p>
+                    </div>
+
+                    <form onSubmit={handleLogin} className="space-y-4">
+                        <div className="space-y-2">
+                            <div className="relative">
+                                <Mail className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                                <Input
+                                    type="email"
+                                    placeholder="Email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    className="pl-10"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-3 w-5 h-5 text-muted-foreground" />
+                                <Input
+                                    type="password"
+                                    placeholder="Password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="pl-10"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" className="rounded border-input text-primary focus:ring-primary" />
+                                <span className="text-muted-foreground">Remember me</span>
+                            </label>
+                            <a href="#" className="text-primary hover:underline">Forgot password?</a>
+                        </div>
+
+                        <Button type="submit" className="w-full" disabled={isLoading} variant="gradient">
+                            {isLoading ? 'Signing in...' : 'Sign In'}
+                            <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                    </form>
+
+                    <div className="mt-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t border-border" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-6 flex gap-3">
+                            <Button
+                                variant="outline"
+                                className="w-full gap-2"
+                                onClick={() => handleSocialLogin(githubProvider)}
+                            >
+                                <Github className="w-4 h-4" />
+                                GitHub
+                            </Button>
+                            <Button
+                                variant="outline"
+                                className="w-full gap-2"
+                                onClick={() => handleSocialLogin(googleProvider)}
+                            >
+                                <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                    <path
+                                        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                        fill="#4285F4"
+                                    />
+                                    <path
+                                        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                        fill="#34A853"
+                                    />
+                                    <path
+                                        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                                        fill="#FBBC05"
+                                    />
+                                    <path
+                                        d="M12 4.63c1.61 0 3.06.56 4.21 1.64l3.15-3.15C17.45 1.25 14.97 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                                        fill="#EA4335"
+                                    />
+                                </svg>
+                                Google
+                            </Button>
+                        </div>
+                    </div>
+
+                    <p className="mt-8 text-center text-sm text-muted-foreground">
+                        Don't have an account?{' '}
+                        <Link to="/signup" className="text-primary hover:underline font-medium">
+                            Sign up
+                        </Link>
+                    </p>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
+export default Login;

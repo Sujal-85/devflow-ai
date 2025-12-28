@@ -19,6 +19,7 @@ const sectionTitles: Record<string, { title: string; subtitle: string }> = {
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const renderContent = () => {
     switch (activeSection) {
@@ -43,9 +44,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar activeSection={activeSection} onSectionChange={setActiveSection} />
-      
-      <div className="ml-[280px] transition-all duration-300">
+      <Sidebar
+        activeSection={activeSection}
+        onSectionChange={setActiveSection}
+        isCollapsed={isSidebarCollapsed}
+        onCollapse={setIsSidebarCollapsed}
+      />
+
+      <div
+        className={`transition-all duration-300 ${isSidebarCollapsed ? 'ml-[80px]' : 'ml-[280px]'}`}
+      >
         <Header title={currentSection.title} subtitle={currentSection.subtitle} />
         <main className="min-h-[calc(100vh-64px)]">
           {renderContent()}

@@ -11,7 +11,6 @@ const integrations = [
 export const SettingsView = () => {
   return (
     <div className="p-6 space-y-6 max-w-4xl">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -37,42 +36,60 @@ export const SettingsView = () => {
           Integrations
         </h3>
         <div className="space-y-4">
-          {integrations.map((integration, index) => {
-            const Icon = integration.icon;
-            return (
-              <motion.div
-                key={integration.name}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 + index * 0.1 }}
-                className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                    <Icon className="w-6 h-6 text-foreground" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{integration.name}</p>
-                    <p className="text-sm text-muted-foreground">{integration.description}</p>
-                  </div>
-                </div>
-                <Button 
-                  variant={integration.connected ? "outline" : "gradient"}
-                  size="sm"
-                  className="gap-2"
-                >
-                  {integration.connected ? (
-                    <>
-                      Connected
-                      <ExternalLink className="w-4 h-4" />
-                    </>
-                  ) : (
-                    'Connect'
-                  )}
-                </Button>
-              </motion.div>
-            );
-          })}
+          {/* GitHub Integration */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                <Github className="w-6 h-6 text-foreground" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">GitHub</p>
+                <p className="text-sm text-muted-foreground">Connect your repositories</p>
+              </div>
+            </div>
+            {/* Mock Connect Logic for UI Demo */}
+            <Button
+              variant="gradient"
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                const token = prompt('Enter your GitHub Personal Access Token (PAT):');
+                if (token) {
+                  // In a real app we would call the backend here
+                  // For now, let's just show the user how it would look
+                  alert('Connecting to GitHub with token: ' + token.substring(0, 5) + '...');
+                  // Call connection API here
+                }
+              }}
+            >
+              Connect
+            </Button>
+          </motion.div>
+
+          {/* Slack Integration (Placeholder) */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex items-center justify-between p-4 rounded-xl bg-card border border-border"
+          >
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                <Slack className="w-6 h-6 text-foreground" />
+              </div>
+              <div>
+                <p className="font-medium text-foreground">Slack</p>
+                <p className="text-sm text-muted-foreground">Get notifications in Slack</p>
+              </div>
+            </div>
+            <Button variant="outline" size="sm" className="gap-2">
+              Connect
+            </Button>
+          </motion.div>
         </div>
       </motion.div>
 
@@ -143,8 +160,8 @@ export const SettingsView = () => {
               key={theme.label}
               className={cn(
                 "p-4 rounded-xl border text-center transition-all",
-                theme.active 
-                  ? "border-primary bg-primary/10 text-primary" 
+                theme.active
+                  ? "border-primary bg-primary/10 text-primary"
                   : "border-border bg-card text-muted-foreground hover:border-primary/50"
               )}
             >
