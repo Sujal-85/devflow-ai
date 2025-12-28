@@ -13,42 +13,59 @@ const sampleCode = `function fetchUserData(userId) {
     });
 }`;
 
-const reviewResult = {
-  score: 85,
-  issues: [
-    {
-      type: 'warning',
-      line: 2,
-      message: 'Consider using template literals instead of string concatenation',
-      suggestion: 'return fetch(`/api/users/${userId}`)'
-    },
-    {
-      type: 'info',
-      line: 4,
-      message: 'Avoid console.log in production code',
-      suggestion: 'Remove or replace with proper logging'
-    },
-    {
-      type: 'suggestion',
-      line: 1,
-      message: 'Consider using async/await for better readability',
-      suggestion: 'async function fetchUserData(userId) { ... }'
-    }
-  ]
-};
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+
+// ... (sampleCode remains)
+
+interface ReviewIssue {
+  type: 'warning' | 'info' | 'suggestion' | 'critical' | 'success';
+  line: number;
+  message: string;
+  suggestion: string;
+}
+
+interface ReviewResult {
+  score: number;
+  issues: ReviewIssue[];
+}
 
 export const CodeReviewView = () => {
+  const { user } = useAuth();
   const [code, setCode] = useState(sampleCode);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showResults, setShowResults] = useState(true);
+  const [showResults, setShowResults] = useState(false);
+  const [reviewResult, setReviewResult] = useState<ReviewResult>({ score: 0, issues: [] });
   const [copied, setCopied] = useState(false);
 
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     setIsAnalyzing(true);
-    setTimeout(() => {
+    setShowResults(false);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/codereview/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user?.token}`
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setReviewResult(data);
+        setShowResults(true);
+        toast.success('Code analysis complete!');
+      } else {
+        toast.error(data.message || 'Analysis failed');
+      }
+    } catch (error) {
+      toast.error('Network error. Please try again.');
+    } finally {
       setIsAnalyzing(false);
-      setShowResults(true);
-    }, 2000);
+    }
   };
 
   const handleCopy = () => {
@@ -94,8 +111,8 @@ export const CodeReviewView = () => {
               <span className="text-sm text-muted-foreground ml-2">code-input.js</span>
             </div>
             <div className="flex items-center gap-2">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={handleCopy}
                 className="gap-2"
@@ -105,7 +122,7 @@ export const CodeReviewView = () => {
               </Button>
             </div>
           </div>
-          
+
           <div className="relative">
             <textarea
               value={code}
@@ -122,10 +139,10 @@ export const CodeReviewView = () => {
               ))}
             </div>
           </div>
-          
+
           <div className="px-4 py-3 border-t border-border flex justify-end">
-            <Button 
-              variant="gradient" 
+            <Button
+              variant="gradient"
               onClick={handleAnalyze}
               disabled={isAnalyzing}
               className="gap-2"
@@ -159,15 +176,15 @@ export const CodeReviewView = () => {
                 <span className="text-sm text-muted-foreground">Score:</span>
                 <span className={cn(
                   "text-lg font-bold",
-                  reviewResult.score >= 80 ? "text-success" : 
-                  reviewResult.score >= 60 ? "text-warning" : "text-destructive"
+                  reviewResult.score >= 80 ? "text-success" :
+                    reviewResult.score >= 60 ? "text-warning" : "text-destructive"
                 )}>
                   {reviewResult.score}/100
                 </span>
               </div>
             )}
           </div>
-          
+
           <div className="p-4 space-y-4 h-[380px] overflow-y-auto">
             {showResults ? (
               reviewResult.issues.map((issue, index) => (

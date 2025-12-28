@@ -4,8 +4,12 @@ import { MetricCard } from './MetricCard';
 import { ProductivityChart } from './ProductivityChart';
 import { ActivityFeed } from './ActivityFeed';
 import { AIInsights } from './AIInsights';
+import { useAuth } from '@/context/AuthContext';
 
 export const DashboardView = () => {
+  const { user } = useAuth();
+  const firstName = user?.name.split(' ')[0] || 'Developer';
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Section */}
@@ -15,10 +19,10 @@ export const DashboardView = () => {
         transition={{ duration: 0.5 }}
         className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary/20 via-primary/10 to-transparent p-8"
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(51_100%_52%/0.1),_transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(226_70%_55%/0.1),_transparent_70%)]" />
         <div className="relative">
           <h1 className="text-2xl font-bold text-foreground">
-            Good morning, Developer! 👋
+            Good morning, {firstName}! 👋
           </h1>
           <p className="text-muted-foreground mt-2 max-w-xl">
             Your productivity is up 12% this week. You have 3 pending code reviews and 2 AI-generated documentation updates ready for review.

@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Sparkles, AlertTriangle, CheckCircle, Lightbulb } from 'lucide-react';
+import { toast } from 'sonner';
+
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -37,6 +39,17 @@ const insights = [
 ];
 
 export const AIInsights = () => {
+  const handleRunAnalysis = () => {
+    toast.info('Running full code analysis...');
+    setTimeout(() => {
+      toast.success('Analysis complete! No new issues found.');
+    }, 1500);
+  };
+
+  const handleInsightAction = (action: string) => {
+    toast.success(`Action triggered: ${action}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -54,7 +67,7 @@ export const AIInsights = () => {
             <p className="text-sm text-muted-foreground">Powered by advanced code analysis</p>
           </div>
         </div>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={handleRunAnalysis}>
           Run Full Analysis
         </Button>
       </div>
@@ -62,7 +75,7 @@ export const AIInsights = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {insights.map((insight, index) => {
           const Icon = insight.icon;
-          
+
           return (
             <motion.div
               key={insight.id}
@@ -78,21 +91,26 @@ export const AIInsights = () => {
               )}>
                 <Icon className="w-5 h-5" />
               </div>
-              
+
               <h4 className="font-medium text-foreground group-hover:text-primary transition-colors">
                 {insight.title}
               </h4>
               <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                 {insight.description}
               </p>
-              
+
               {insight.file && (
                 <p className="text-xs text-muted-foreground mt-3 font-mono truncate">
                   {insight.file}
                 </p>
               )}
-              
-              <Button variant="ghost" size="sm" className="mt-4 w-full">
+
+              <Button
+                variant="ghost"
+                size="sm"
+                className="mt-4 w-full"
+                onClick={() => handleInsightAction(insight.actionLabel)}
+              >
                 {insight.actionLabel}
               </Button>
             </motion.div>
