@@ -56,13 +56,31 @@ export const SettingsView = () => {
               variant="gradient"
               size="sm"
               className="gap-2"
-              onClick={() => {
+              onClick={async () => {
                 const token = prompt('Enter your GitHub Personal Access Token (PAT):');
                 if (token) {
-                  // In a real app we would call the backend here
-                  // For now, let's just show the user how it would look
-                  alert('Connecting to GitHub with token: ' + token.substring(0, 5) + '...');
-                  // Call connection API here
+                  try {
+                    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+                    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/github/connect`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${userInfo.token}` // Assuming userInfo has a token
+                      },
+                      body: JSON.stringify({ githubToken: token })
+                    });
+
+                    if (response.ok) {
+                      alert('GitHub connected successfully!');
+                      // Optionally, refresh state or redirect
+                    } else {
+                      const errorData = await response.json();
+                      alert(`Failed to connect GitHub: ${errorData.message || response.statusText}`);
+                    }
+                  } catch (error) {
+                    console.error('Error connecting to GitHub:', error);
+                    alert('An error occurred while connecting to GitHub.');
+                  }
                 }
               }}
             >
