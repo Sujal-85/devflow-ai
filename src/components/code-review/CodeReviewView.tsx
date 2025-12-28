@@ -43,7 +43,7 @@ export const CodeReviewView = () => {
     setShowResults(false);
 
     try {
-      const response = await fetch('http://localhost:5000/api/codereview/analyze', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/codereview/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
